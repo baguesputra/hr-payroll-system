@@ -1,0 +1,84 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: hr_app
+    restart: unless-stopped
+    volumes:
+      - ./backend:/var/www
+    networks:
+      - hr_network
+    depends_on:
+      - postgres
+      - redis
+
+  nginx:
+    image: nginx:alpine
+    container_name: hr_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - hr_network
+    depends_on:
+      - app
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: hr_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hr_payroll
+      POSTGRES_USER: hr_user
+      POSTGRES_PASSWORD: hr_secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - hr_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: hr_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - hr_network
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: hr_queue
+    restart: unless-stopped
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    volumes:
+      - ./backend:/var/www
+    networks:
+      - hr_network
+    depends_on:
+      - postgres
+      - redis
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: hr_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - hr_network
+
+networks:
+  hr_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
