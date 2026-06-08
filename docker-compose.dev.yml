@@ -1,0 +1,15 @@
+services:
+  app:
+    environment:
+      APP_ENV: local
+      XDEBUG_MODE: develop,debug
+    volumes:
+      - ./backend:/var/www
+
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"

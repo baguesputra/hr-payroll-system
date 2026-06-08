@@ -28,3 +28,27 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# Backend
+backend/.env
+backend/vendor/
+backend/node_modules/
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/.phpunit.result.cache
+backend/coverage/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/coverage/
+
+# Docker
+postgres_data/
+
+# OS
+.DS_Store
+Thumbs.db
