@@ -1,0 +1,98 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [develop, 'feature/**', 'fix/**']
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: hr_payroll_test
+          POSTGRES_USER: hr_user
+          POSTGRES_PASSWORD: hr_secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo, pdo_pgsql, pgsql, redis, mbstring, bcmath, zip, gd
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy environment file
+        working-directory: backend
+        run: cp .env.example .env.testing
+
+      - name: Configure test environment
+        working-directory: backend
+        run: |
+          echo "APP_ENV=testing" >> .env.testing
+          echo "APP_KEY=" >> .env.testing
+          echo "DB_CONNECTION=pgsql" >> .env.testing
+          echo "DB_HOST=127.0.0.1" >> .env.testing
+          echo "DB_PORT=5432" >> .env.testing
+          echo "DB_DATABASE=hr_payroll_test" >> .env.testing
+          echo "DB_USERNAME=hr_user" >> .env.testing
+          echo "DB_PASSWORD=hr_secret" >> .env.testing
+          echo "REDIS_HOST=127.0.0.1" >> .env.testing
+          echo "QUEUE_CONNECTION=sync" >> .env.testing
+          echo "CACHE_STORE=array" >> .env.testing
+          echo "SESSION_DRIVER=array" >> .env.testing
+          echo "MAIL_MAILER=array" >> .env.testing
+
+      - name: Generate application key
+        working-directory: backend
+        run: php artisan key:generate --env=testing
+
+      - name: Run database migrations
+        working-directory: backend
+        run: php artisan migrate --env=testing --force
+
+      - name: Run Pest tests with coverage
+        working-directory: backend
+        run: ./vendor/bin/pest --coverage --min=30
