@@ -18,19 +18,21 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
 
-      setAuth: (token, user) => set({
-        token,
-        user,
-        isAuthenticated: true,
-      }),
+      setAuth: (token, user) =>
+        set({
+          token,
+          user,
+          isAuthenticated: true,
+        }),
 
       setUser: (user) => set({ user }),
 
-      logout: () => set({
-        token: null,
-        user: null,
-        isAuthenticated: false,
-      }),
+      logout: () =>
+        set({
+          token: null,
+          user: null,
+          isAuthenticated: false,
+        }),
     }),
     {
       name: 'hr-auth-storage',

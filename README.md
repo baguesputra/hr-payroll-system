@@ -1,10 +1,13 @@
 # HR Payroll System
 
+[![Backend CI](https://github.com/baguesputra/hr-payroll-system/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/baguesputra/hr-payroll-system/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/baguesputra/hr-payroll-system/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/baguesputra/hr-payroll-system/actions/workflows/frontend-ci.yml)
+
 A comprehensive HR & Payroll Management System built with Laravel 13 and React.
 
 ## Tech Stack
 
-**Backend:** Laravel 13, PHP 8.3, PostgreSQL, Redis  
+**Backend:** Laravel 13, PHP 8.4, PostgreSQL, Redis  
 **Frontend:** React 19, TypeScript, Tailwind CSS, shadcn/ui  
 **Infrastructure:** Docker, GitHub Actions  
 
