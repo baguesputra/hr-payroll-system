@@ -1,5 +1,8 @@
 # HR Payroll System
 
+[![Backend CI](https://github.com/baguesputra/hr-payroll-system/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/baguesputra/hr-payroll-system/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/baguesputra/hr-payroll-system/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/baguesputra/hr-payroll-system/actions/workflows/frontend-ci.yml)
+
 A comprehensive HR & Payroll Management System built with Laravel 13 and React.
 
 ## Tech Stack
