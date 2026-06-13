@@ -139,4 +139,56 @@ class EmployeeService
             ->orderBy('name')
             ->get();
     }
+
+    public function getSalaryHistories(Employee $employee): \Illuminate\Database\Eloquent\Collection
+    {
+        return $employee->salaryHistories()
+            ->with('createdBy:id,name')
+            ->orderByDesc('effective_date')
+            ->get();
+    }
+
+    public function updateSalary(Employee $employee, array $data, int $updatedBy): EmployeeSalaryHistory
+    {
+        $history = EmployeeSalaryHistory::create([
+            'employee_id'    => $employee->id,
+            'base_salary'    => $data['base_salary'],
+            'effective_date' => $data['effective_date'],
+            'reason'         => $data['reason'],
+            'created_by'     => $updatedBy,
+        ]);
+
+        return $history->load('createdBy:id,name');
+    }
+
+    public function getPositionHistories(Employee $employee): \Illuminate\Database\Eloquent\Collection
+    {
+        return $employee->positionHistories()
+            ->with(['position:id,name', 'department:id,name', 'createdBy:id,name'])
+            ->orderByDesc('effective_date')
+            ->get();
+    }
+
+    public function updatePosition(Employee $employee, array $data, int $updatedBy): EmployeePositionHistory
+    {
+        return DB::transaction(function () use ($employee, $data, $updatedBy) {
+            // Update posisi aktif karyawan
+            $employee->update([
+                'position_id'   => $data['position_id'],
+                'department_id' => $data['department_id'],
+            ]);
+
+            // Catat history
+            $history = EmployeePositionHistory::create([
+                'employee_id'    => $employee->id,
+                'position_id'    => $data['position_id'],
+                'department_id'  => $data['department_id'],
+                'effective_date' => $data['effective_date'],
+                'reason'         => $data['reason'],
+                'created_by'     => $updatedBy,
+            ]);
+
+            return $history->load(['position:id,name', 'department:id,name', 'createdBy:id,name']);
+        });
+    }
 }
